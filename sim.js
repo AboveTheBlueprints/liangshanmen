@@ -186,7 +186,13 @@ var LIANGSHAN = (function () {
     var done = table.length === N_DAYS || !meAlive;
     var next = null;
     if (done) out.push(ending());
-    else next = '第 ' + (table.length + 1 > Y1 ? '二年第 ' + (table.length + 1 - Y1) : (table.length + 1)) + ' 天早上，你去哪？';
+    else {
+      // 两扇门网1、网2：不知道一冬还剩几个早上，跨年也来得突然
+      var d1 = table.length + 1;
+      if (d1 <= Y1) next = '头一年冬天，第 ' + d1 + ' 天早上（这一冬还剩 ' + (Y1 - d1 + 1) + ' 个早上，算今天）。你去哪？';
+      else if (d1 === Y1 + 1) next = '头一年冬天过完了。下一个早上就是第二年冬天的头一天（第二年冬天一共 ' + (N_DAYS - Y1) + ' 个早上）。你去哪？';
+      else next = '第二年冬天，第 ' + (d1 - Y1) + ' 天早上（还剩 ' + (N_DAYS - d1 + 1) + ' 个早上，算今天）。你去哪？';
+    }
     return { blocks: out, done: done, next: next };
 
     function ending() {
@@ -194,7 +200,7 @@ var LIANGSHAN = (function () {
       if (!meAlive) L.push('—— 你没了 ——');
       else { L.push('—— 开春了 ——'); L.push('那户人家把盒子摘下来收进屋里，说明年还挂。'); }
       function tab(rows, off) {
-        L.push('  天  你     推左  推右  干看着   那天');
+        L.push('  天  你     推左  推右  干看着   那天（推左、推右都算上你）');
         rows.forEach(function (r) {
           var note = [];
           if (r[7]) note.push('雪上' + r[7] + '边有猫的印子');

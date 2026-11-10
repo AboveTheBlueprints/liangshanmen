@@ -16,6 +16,8 @@
   .blk .ln { margin: 0; }
   .blk.old .ln { color: #6a746a; }
   .blk.big .hd { font-weight: 600; color: #3d5a3d; font-size: 16px; }
+  details summary { cursor: pointer; color: #5f6f5f; font-size: 14px; margin: 6px 0; }
+  details.open summary { margin-bottom: 8px; }
   pre.tab { margin: 8px 0; padding: 10px 12px; background: #dde5da; border-radius: 6px; font-size: 13px; line-height: 1.6; overflow-x: auto; font-family: "Menlo", "PingFang SC", monospace; white-space: pre; }
   #bar { position: fixed; left: 0; right: 0; bottom: 0; background: #e3e9df; border-top: 1px solid #c3cfbf; }
   #bar .in { max-width: 640px; margin: 0 auto; padding: 12px 18px 16px; }
@@ -28,7 +30,7 @@
 <body>
 <main>
   <h1>两扇门</h1>
-  <div class="open">
+  <details class="open" id="open" open><summary id="opsum">开头的话</summary>
     <p>冬天。林子边上，一户人家在窗外挂了一只木头喂食盒，今年头一回挂。</p>
     <p>盒子正面有两块小踏板，左边一块，右边一块。往里推哪一块，都会掉出一条面包虫。可谁也不知道。</p>
     <p>你是一只大山雀，黑脑袋，白脸颊，胸口一道黑条。这片林子里还有十来只跟你一样的。每天早上你们都到盒子跟前来。</p>
@@ -37,7 +39,7 @@
     看：落在旁边的树枝上，只看，不推（这天早上你就不吃了）<br>
     不去：这天早上去别处找吃的<br>
     教左 / 教右：落上那边踏板，不急着推，一下一下慢慢踩，让一只还没那么推过的鸟落在旁边看（你在踏板上待得久）</p>
-  </div>
+  </details>
   <div id="log"></div>
 </main>
 <div id="bar"><div class="in"><div id="ask"></div><div id="btns"></div></div></div>
@@ -49,8 +51,18 @@ function div(cls, text) { var d = document.createElement('div'); d.className = c
 function render() {
   var r = LIANGSHAN.run(acts);
   log.innerHTML = '';
+  // 两扇门网1、网2：越玩越长，新的一天找不着。前面的早上收进一个能点开的框里，只摊开最近两段。
+  document.getElementById('open').open = acts.length === 0;
+  var keep = r.done ? 1 : 2, nOld = r.blocks.length - keep, oldBox = null;
+  if (nOld > 0) {
+    oldBox = document.createElement('details');
+    var sm = document.createElement('summary');
+    sm.textContent = '前面的早上（' + nOld + ' 段，点开看）';
+    oldBox.appendChild(sm); log.appendChild(oldBox);
+  }
   r.blocks.forEach(function (b, idx) {
     var last = idx === r.blocks.length - 1;
+    var host = (oldBox && idx < nOld) ? oldBox : log;
     var lines = b.split('\n');
     var box = div('blk' + (last ? '' : ' old'), '');
     var inTab = null;
@@ -70,7 +82,7 @@ function render() {
       }
       box.appendChild(div('ln', l));
     });
-    log.appendChild(box);
+    host.appendChild(box);
   });
   btns.innerHTML = '';
   if (r.done) {
